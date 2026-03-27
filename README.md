@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Kueue (KumasiQueue)
 
-## Getting Started
+A modern food ordering and queue management platform built for Kumasi's busy markets. Kueue connects customers with local food sellers through an organized, transparent system to eliminate uncertain queues and reduce wasted food.
 
-First, run the development server:
+## Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Kueue addresses the inefficiencies in street food ordering by providing a digital queue management system. Customers can see their place in line before arriving, pay upfront via Mobile Money, and receive a pickup code. Sellers gain an organized order list, payment confirmation, and a simple dashboard that works on any phone.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### For Customers
+- Browse sellers by category (Waakye, Shawarma, Fufu, etc.)
+- Real-time queue status and estimated wait times
+- Secure Mobile Money payments (MTN MoMo, Telecel Cash)
+- 4-digit pickup codes for seamless collection
+- No app download required
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### For Sellers
+- Organized order list with status tracking (Pending, Cooking, Ready)
+- Upfront payment confirmation to eliminate ghost orders
+- Simple dashboard optimized for mobile devices
+- Free 30-day trial
 
-## Learn More
+## Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Framework:** Next.js 14 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **Database:** Supabase (PostgreSQL)
+- **Authentication:** Supabase Auth
+- **Icons:** Lucide React
+- **Fonts:** Plus Jakarta Sans, Manrope
+- **Deployment:** Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Design System
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+The UI follows the "Modern Weaver" design philosophy, emphasizing structural rhythm, tonal layering, and a Ghanaian-inspired color palette. Key principles include:
 
-## Deploy on Vercel
+- **Tonal Depth:** Using background color shifts instead of borders for sectioning.
+- **Editorial Typography:** Pairing Plus Jakarta Sans for headlines with Manrope for body text.
+- **Ghanaian Palette:** Using Green, Red, and Gold as strategic accents rather than dominant fills.
+- **Asymmetry:** Intentional layout breaks to create visual interest.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+This project is hosted on Vercel. Environment variables for Supabase connection are managed securely through the Vercel dashboard.
+
+## License
+
+MIT License
+
+## Contact
+
+Made in Kumasi, Ghana.
