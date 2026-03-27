@@ -1,3 +1,4 @@
+'use client';
 // src/app/page.tsx
 // Kueue - Main Landing Page (DESIGN.md "Modern Weaver" Implementation)
 import { 
@@ -109,7 +110,7 @@ export default function Home() {
               {/* Headline */}
               <h1 className="text-5xl lg:text-7xl font-display font-bold text-on_surface leading-[0.98] tracking-tight mb-6">
                 Order Food.{' '}
-                <span className="text-primary">Know Your Turn.</span>{' '}
+                <span className="text-primary italic">Know Your Turn.</span>{' '}
                 <br className="hidden lg:block" />
                 Pick Up with Confidence.
               </h1>
