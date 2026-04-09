@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { ChefHat, ArrowLeft, Mail, Lock } from 'lucide-react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '../../lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
 export default function SellerLogin() {
