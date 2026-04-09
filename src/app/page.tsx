@@ -54,8 +54,8 @@ export default function Home() {
 
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center gap-4">
-              <Link href="/seller/signup" className="text-sm font-medium text-on_surface/70 hover:text-primary transition">
-                Sign In
+              <Link href="/seller/login" className="text-sm font-medium text-on_surface/70 hover:text-primary transition">
+                Log In
               </Link>
               <Link 
                 href="/seller/signup" 

@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { ChefHat, MapPin, Phone, Utensils, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import { supabase } from '../../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
 // Food categories available in Kumasi
 const FOOD_CATEGORIES = [
