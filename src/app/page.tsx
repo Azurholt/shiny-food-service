@@ -104,7 +104,7 @@ export default function Home() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-surface_container_lowest px-4 py-2 rounded-full shadow-sm mb-8">
                 <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-                <span className="text-sm font-medium text-primary">Now serving Kumasi</span>
+                <span className="text-sm font-medium text-primary">Now serving KNUST & Ayeduase</span>
               </div>
 
               {/* Headline */}
@@ -117,8 +117,8 @@ export default function Home() {
 
               {/* Subheadline */}
               <p className="text-lg text-on_surface/70 mb-10 max-w-xl leading-relaxed font-body">
-                No more waiting in uncertain queues. No more wasted food from cancelled orders. 
-                Built for Kumasi's busy food sellers and hungry customers.
+                No more waiting in uncertain queues after tiring lectures. No more wasted food from cancelled orders. 
+                Built for KNUST's busy food sellers and hungry students.
               </p>
 
               {/* CTA Buttons */}
@@ -200,7 +200,7 @@ export default function Home() {
                 Explore by Taste
               </h2>
               <p className="text-on_surface/60 font-body">
-                Discover the best food from top-rated Kumasi restaurants.
+                Discover the best food from top-rated Hadjia's and Aunties and Uncles around KNUST.
               </p>
             </div>
             <Link href="#marketplace" className="hidden sm:inline-flex items-center gap-2 text-primary font-semibold hover:text-primary-container transition">
@@ -264,7 +264,7 @@ export default function Home() {
                 iconBg: 'bg-tertiary-fixed/20',
                 iconColor: 'text-tertiary',
                 title: '1. Browse Sellers',
-                description: 'Find food sellers near you by category — shawarma, bread & egg, waakye, and more.'
+                description: 'Find food sellers near you by category — shawarma, bread & egg, waakye, and more .'
               },
               {
                 icon: CreditCard,
@@ -389,7 +389,7 @@ export default function Home() {
               <div className="border-t border-white/10 pt-6">
                 <p className="text-sm text-white/50 mb-4 font-body">Join sellers in:</p>
                 <div className="flex flex-wrap gap-2">
-                  {['Adum', 'Kejetia', 'Asawase', 'Bomso'].map((location, index) => (
+                  {['Ayeduase Gate', 'Engineering Gate', 'Conti Market', 'Kotei'].map((location, index) => (
                     <span 
                       key={index}
                       className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm text-white/80 font-body transition-colors cursor-default"
@@ -404,12 +404,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ==================== BUILT FOR KUMASI ==================== */}
+      {/* ==================== BUILT FOR KNUST ==================== */}
       <section className="py-24 bg-tertiary-fixed/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-display font-bold text-on_surface mb-4">
-              Built for Kumasi 🇬🇭
+              Built for KNUST 🇬🇭
             </h2>
           </div>
 
@@ -455,7 +455,7 @@ export default function Home() {
                 <span className="text-lg font-display font-bold text-white">Kueue</span>
               </div>
               <p className="text-white/60 text-sm leading-relaxed mb-6 font-body">
-                Making food ordering simple for Kumasi's busy markets. Order. Track. Enjoy.
+                Making food ordering simple for KNUST's busy markets. Order. Track. Enjoy.
               </p>
               <div className="flex items-center gap-4">
                 <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-white/20 transition">
@@ -505,7 +505,7 @@ export default function Home() {
           {/* Bottom Bar */}
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-white/40 text-sm font-body">
-              © 2026 Kueue. Made with ❤️ in Kumasi, Ghana.
+              © 2026 Kueue. Made with ❤️ in KNUST, Ghana.
             </p>
             <div className="flex items-center gap-6 text-sm">
               <a href="#privacy" className="text-white/40 hover:text-white/60 transition font-body">Privacy Policy</a>

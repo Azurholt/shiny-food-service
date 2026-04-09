@@ -19,7 +19,7 @@ const manrope = Manrope({
 // Metadata (must be BEFORE default export)
 export const metadata: Metadata = {
   title: "Kueue",
-  description: "Making food ordering simple for Kumasi's busy markets",
+  description: "Making food ordering simple for KNUST's busy markets",
 };
 
 // ONE default export only
