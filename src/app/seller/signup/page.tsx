@@ -1,339 +1,207 @@
-// src/app/seller/signup/page.tsx
-// Kueue - Seller Registration Form
-
-'use client';  // This tells Next.js this is a client component (uses useState)
+'use client';
 
 import { useState } from 'react';
-import { ChefHat, MapPin, Phone, Utensils, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
+import { ChefHat, ArrowLeft, Store, User, Phone, Lock, MapPin, Tag, Loader2, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
-
-// Food categories available in Kumasi
-const FOOD_CATEGORIES = [
-  { value: '', label: 'Select your food type' },
-  { value: 'bread-egg', label: '🍳 Bread & Egg' },
-  { value: 'shawarma', label: '🌯 Shawarma' },
-  { value: 'waakye', label: '🍲 Waakye' },
-  { value: 'chicken-rice', label: '🍗 Chicken & Rice' },
-  { value: 'fufu', label: '🥣 Fufu & Soup' },
-  { value: 'kebabs', label: '🍢 Kebabs' },
-  { value: 'snacks', label: '🥟 Snacks & Small Chops' },
-  { value: 'other', label: '🍽️ Other' },
-];
-
-// Popular locations in Kumasi
-const KUMASI_LOCATIONS = [
-  { value: '', label: 'Select your location' },
-  { value: 'adum', label: 'Adum' },
-  { value: 'ayeduase gate', label: 'Ayeduase Gate' },
-  { value: 'engineering gate', label: 'Engineering Gate' },
-  { value: 'kejetia', label: 'Kejetia' },
-  { value: 'asawase', label: 'Asawase' },
-  { value: 'bomso', label: 'Bomso' },
-  { value: 'ahodwo', label: 'Ahodwo' },
-  { value: 'nhyiaeso', label: 'Nhyiaeso' },
-  { value: 'tafo', label: 'Tafo' },
-  { value: 'suame', label: 'Suame' },
-  { value: 'kronum', label: 'Kronum' },
-  { value: 'other', label: 'Other (specify in notes)' },
-];
+import { useRouter } from 'next/navigation';
 
 export default function SellerSignup() {
-  // Form state - stores all the input values
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     businessName: '',
     ownerName: '',
     phone: '',
+    pin: '',
     location: '',
-    foodCategory: '',
-    notes: '',
+    category: ''
   });
-
-  // Submission state
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const router = useRouter();
 
-  // Handle input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error when user starts typing
-    if (error) setError('');
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    // Basic validation
-    if (!formData.businessName || !formData.ownerName || !formData.phone || !formData.location || !formData.foodCategory) {
-      setError('Please fill in all required fields');
+    // Validation
+    if (!/^\d{4}$/.test(form.pin)) {
+      setError('PIN must be exactly 4 digits.');
+      setLoading(false);
       return;
     }
-
-    // Validate phone number (Ghana format - 10 digits)
-    const phoneRegex = /^0[1-9]\d{8}$/;
-    if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
-      setError('Please enter a valid Ghana phone number (e.g., 0541234567)');
+    if (!/^0[1-9]\d{8}$/.test(form.phone.replace(/\s/g, ''))) {
+      setError('Enter a valid Ghanaian phone number (024..., 054..., etc.).');
+      setLoading(false);
       return;
     }
-
-    setIsSubmitting(true);
 
     try {
-      // Send data to Supabase
-      const { data, error: supabaseError } = await supabase
+      // 1. Generate hidden email & pad PIN for Supabase
+      const cleanPhone = form.phone.replace(/\D/g, '');
+      const hiddenEmail = `kueue_seller_${cleanPhone}@app.local`;
+      const paddedPin = `KUE_${form.pin}`; // Meets 6-char requirement
+
+      // 2. Sign up with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: hiddenEmail,
+        password: paddedPin,
+        options: {
+          data: {
+            full_name: form.ownerName,
+            phone: form.phone
+          }
+        }
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error('Signup failed. Please try again.');
+
+      // 3. Create seller profile linked to auth user
+      const { error: profileError } = await supabase
         .from('sellers')
-        .insert([
-          {
-            business_name: formData.businessName,
-            owner_name: formData.ownerName,
-            phone: formData.phone,
-            location: formData.location,
-            food_category: formData.foodCategory,
-            notes: formData.notes || null,
-            status: 'pending',
-          },
-        ]);
-        
-      if (supabaseError) {
-        throw supabaseError;
-      }
+        .insert({
+          user_id: authData.user.id,
+          business_name: form.businessName,
+          owner_name: form.ownerName,
+          phone: form.phone,
+          location: form.location,
+          food_category: form.category,
+          status: 'pending'
+        });
 
-      console.log('Seller registered successfully:', data);
-      setIsSubmitted(true);
+      if (profileError) throw profileError;
+
+      setSuccess(true);
+      setTimeout(() => router.push('/seller/login'), 2000);
     } catch (err: any) {
-      console.error('Registration error:', err);
-      setError(err.message || 'Failed to register. Please try again.');
+      setError(err.message || 'Something went wrong. Please try again.');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
-  }
+  };
 
-  // Show success message after submission
-  if (isSubmitted) {
+  if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
-          <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Registration Received!</h1>
-          <p className="text-gray-600 mb-6">
-            Thank you, <strong>{formData.ownerName}</strong>! We'll review your application for 
-            <strong> {formData.businessName}</strong> and contact you at <strong>{formData.phone}</strong> within 24 hours.
-          </p>
-          <Link 
-            href="/" 
-            className="inline-block bg-green-700 text-white px-6 py-3 rounded-lg hover:bg-green-800 transition"
-          >
-            Back to Home
-          </Link>
+      <div className="min-h-screen bg-surface flex items-center justify-center px-4">
+        <div className="text-center">
+          <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
+          <h2 className="text-2xl font-display font-bold text-on_surface mb-2">Stall Registered!</h2>
+          <p className="font-body text-on_surface/60">Redirecting to login...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Link href="/" className="text-gray-600 hover:text-gray-900">
-            <ArrowLeft className="w-6 h-6" />
-          </Link>
-          <div className="flex items-center gap-2">
-            <ChefHat className="w-8 h-8 text-yellow-600" />
-            <span className="text-xl font-bold text-gray-800">Kueue</span>
+    <div className="min-h-screen bg-surface flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-lg relative">
+        {/* Adinkra Watermark (Nyame Nti - Faith) */}
+        <div className="absolute -top-12 -right-12 w-48 h-48 opacity-[0.04] pointer-events-none">
+          <svg viewBox="0 0 100 100" className="w-full h-full fill-on_surface">
+            <path d="M50 10 C30 10 10 30 10 50 C10 70 30 90 50 90 C70 90 90 70 90 50 C90 30 70 10 50 10 Z M50 25 C60 25 70 35 70 50 C70 65 60 75 50 75 C40 75 30 65 30 50 C30 35 40 25 50 25 Z" />
+          </svg>
+        </div>
+
+        <Link href="/" className="inline-flex items-center gap-2 text-on_surface/60 hover:text-primary mb-8 transition font-body text-sm">
+          <ArrowLeft className="w-5 h-5" /> Back to Home
+        </Link>
+
+        <div className="bg-surface_container_lowest rounded-2xl p-8 shadow-sm">
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <ChefHat className="w-12 h-12 text-tertiary-fixed" />
+            </div>
+            <h1 className="text-2xl font-display font-bold text-on_surface mb-2">Register Your Stall</h1>
+            <p className="font-body text-on_surface/60 text-sm">Free for 30 days. No setup fees.</p>
           </div>
-        </div>
-      </header>
 
-      {/* Main Form */}
-      <main className="max-w-3xl mx-auto px-4 py-8">
-        
-        {/* Page Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Register Your Food Stall</h1>
-          <p className="text-gray-600">Join Kueue and organize your orders today</p>
-        </div>
-
-        {/* Form Card */}
-        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-          
-          {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
-              <AlertCircle className="w-5 h-5" />
-              <span>{error}</span>
+            <div className="bg-secondary/10 border border-secondary/20 text-secondary px-4 py-3 rounded-lg mb-6 text-sm font-body">
+              {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSignup} className="space-y-5">
+            <InputField label="Stall Name" name="businessName" icon={<Store className="w-5 h-5" />} placeholder="e.g. Auntie Ama's Waakye" value={form.businessName} onChange={handleChange} required />
+            <InputField label="Owner Name" name="ownerName" icon={<User className="w-5 h-5" />} placeholder="Your full name" value={form.ownerName} onChange={handleChange} required />
+            <InputField label="Phone Number" name="phone" icon={<Phone className="w-5 h-5" />} placeholder="054 123 4567" value={form.phone} onChange={handleChange} required />
+            <InputField label="Create 4-Digit PIN" name="pin" icon={<Lock className="w-5 h-5" />} placeholder="1234" type="password" maxLength={4} value={form.pin} onChange={handleChange} required />
             
-            {/* Business Name */}
-            <div>
-              <label htmlFor="businessName" className="block text-sm font-semibold text-gray-700 mb-2">
-                Business / Stall Name <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <Utensils className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  id="businessName"
-                  name="businessName"
-                  value={formData.businessName}
-                  onChange={handleChange}
-                  placeholder="e.g., Auntie Ama's Shawarma"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-gray-900"
-                  required
-                />
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              <InputField label="Location" name="location" icon={<MapPin className="w-5 h-5" />} placeholder="e.g. Engineering Gate" value={form.location} onChange={handleChange} required />
+              <SelectField label="Food Category" name="category" value={form.category} onChange={handleChange} required>
+                <option value="">Select...</option>
+                <option value="waakye">Waakye</option>
+                <option value="shawarma">Shawarma</option>
+                <option value="fufu">Fufu & Soup</option>
+                <option value="rice">Rice & Stew</option>
+                <option value="snacks">Snacks</option>
+                <option value="other">Other</option>
+              </SelectField>
             </div>
 
-            {/* Owner Name */}
-            <div>
-              <label htmlFor="ownerName" className="block text-sm font-semibold text-gray-700 mb-2">
-                Your Full Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="ownerName"
-                name="ownerName"
-                value={formData.ownerName}
-                onChange={handleChange}
-                placeholder="e.g., Ama Mensah"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-gray-900"
-                required
-              />
-            </div>
-
-            {/* Phone Number */}
-            <div>
-              <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                Phone Number (Mobile Money) <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="e.g., 0541234567"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-gray-900"
-                  required
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1">We'll use this for payments and notifications</p>
-            </div>
-
-            {/* Location */}
-            <div>
-              <label htmlFor="location" className="block text-sm font-semibold text-gray-700 mb-2">
-                Your Location in Kumasi <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <select
-                  id="location"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition bg-white text-gray-900"
-                  required
-                >
-                  {KUMASI_LOCATIONS.map(loc => (
-                    <option key={loc.value} value={loc.value}>
-                      {loc.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Food Category */}
-            <div>
-              <label htmlFor="foodCategory" className="block text-sm font-semibold text-gray-700 mb-2">
-                Primary Food Category <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="foodCategory"
-                name="foodCategory"
-                value={formData.foodCategory}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition bg-white text-gray-900"
-                required
-              >
-                {FOOD_CATEGORIES.map(cat => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Additional Notes */}
-            <div>
-              <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 mb-2">
-                Additional Notes <span className="text-gray-400">(optional)</span>
-              </label>
-              <textarea
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                placeholder="Tell us about your menu, operating hours, or any special requirements..."
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition resize-none text-gray-900"
-              />
-            </div>
-
-            {/* Submit Button */}
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-green-700 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={loading}
+              className="w-full bg-gradient-to-br from-primary to-primary-container hover:from-primary-container hover:to-primary text-white py-4 rounded-lg font-body font-semibold transition shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
             >
-              {isSubmitting ? '⏳ Submitting...' : '✅ Register My Stall'}
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Start Selling'}
             </button>
-
-            {/* Terms */}
-            <p className="text-xs text-gray-500 text-center">
-              By registering, you agree to our Terms of Service. Free trial for the first 30 days.
-            </p>
           </form>
-        </div>
 
-        {/* Benefits Section */}
-        <div className="mt-8 grid md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg p-4 text-center shadow-sm">
-            <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
-            <h3 className="font-semibold text-gray-800">Free 30-Day Trial</h3>
-            <p className="text-sm text-gray-600">No payment required to start</p>
-          </div>
-          <div className="bg-white rounded-lg p-4 text-center shadow-sm">
-            <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
-            <h3 className="font-semibold text-gray-800">Works on Any Phone</h3>
-            <p className="text-sm text-gray-600">No expensive equipment needed</p>
-          </div>
-          <div className="bg-white rounded-lg p-4 text-center shadow-sm">
-            <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
-            <h3 className="font-semibold text-gray-800">Get Paid Faster</h3>
-            <p className="text-sm text-gray-600">Mobile Money payments upfront</p>
-          </div>
+          <p className="text-center mt-6 text-sm font-body text-on_surface/60">
+            Already have a stall?{' '}
+            <Link href="/seller/login" className="text-primary font-semibold hover:underline">
+              Sign In
+            </Link>
+          </p>
         </div>
-      </main>
+      </div>
+    </div>
+  );
+}
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 text-center mt-12">
-        <p className="text-gray-400">© 2026 Kueue. Made with ❤️ in Kumasi.</p>
-      </footer>
+// Reusable Input Component (DESIGN.md Compliant)
+function InputField({ label, name, icon, placeholder, type = "text", maxLength, value, onChange, required }: any) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-tertiary mb-2 uppercase tracking-wide font-display">{label}</label>
+      <div className="relative">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on_surface/40">{icon}</span>
+        <input
+          type={type}
+          name={name}
+          maxLength={maxLength}
+          value={value}
+          onChange={onChange}
+          className="w-full pl-10 pr-4 py-3 bg-transparent border-b border-outline_variant/40 focus:border-primary focus:outline-none transition font-body text-on_surface placeholder:text-on_surface/30"
+          placeholder={placeholder}
+          required={required}
+        />
+      </div>
+    </div>
+  );
+}
+
+function SelectField({ label, name, value, onChange, children, required }: any) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-tertiary mb-2 uppercase tracking-wide font-display">{label}</label>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="w-full px-4 py-3 bg-transparent border-b border-outline_variant/40 focus:border-primary focus:outline-none transition font-body text-on_surface appearance-none"
+        required={required}
+      >
+        {children}
+      </select>
     </div>
   );
 }
