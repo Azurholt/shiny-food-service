@@ -10,7 +10,8 @@ import {
   Clock, 
   Pause, 
   Play,
-  MoreVertical
+  MoreVertical,
+  CheckCircle
 } from 'lucide-react';
 
 // Mock Data representing the Stitch output
@@ -18,25 +19,37 @@ const INITIAL_ORDERS = [
   {
     id: '4821',
     customer: 'Kwame A.',
+    phone: '0502928773',
     location: 'Ayeduase Gate',
     items: 'Fufu & Light Soup (2), Extra Goat Meat',
-    status: 'pending', // pending, cooking, ready
+    quantity: 2,
+    specialNotes: 'Extra goat meat, no fish',
+    status: 'pending',
+    paymentStatus: 'paid',
     time: '12:04 PM'
   },
   {
     id: '1052',
     customer: 'Amara O.',
+    phone: '0241234567',
     location: 'Engineering Gate',
     items: 'Jollof Rice (Regular), Fried Plantain, Grilled Chicken',
+    quantity: 1,
+    specialNotes: '',
     status: 'cooking',
+    paymentStatus: 'paid',
     time: '11:58 AM'
   },
   {
     id: '9934',
     customer: 'Kofi B.',
+    phone: '0541234567',
     location: 'KNUST Post Office',
     items: 'Banku & Tilapia (Large), Extra Shito',
+    quantity: 1,
+    specialNotes: 'Very spicy shito',
     status: 'ready',
+    paymentStatus: 'paid',
     time: '11:45 AM'
   }
 ];
@@ -44,12 +57,34 @@ const INITIAL_ORDERS = [
 export default function SellerDashboard() {
   const [activeTab, setActiveTab] = useState('queue');
   const [isPaused, setIsPaused] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<typeof INITIAL_ORDERS[0] | null>(null);
 
   // Toggle Pause Logic
   const togglePause = () => {
     setIsPaused(!isPaused);
     // TODO: Update Supabase sellers.is_accepting_app_orders here
+  };
+
+  // Handle Status Change - THIS WAS MISSING!
+  const handleStatusChange = async (orderId: string, newStatus: 'cooking' | 'ready' | 'completed') => {
+    try {
+      // TODO: Update Supabase orders table
+      // const { error } = await supabase
+      //   .from('orders')
+      //   .update({ order_status: newStatus })
+      //   .eq('id', orderId);
+      
+      // if (error) throw error;
+      
+      // For now, just close the modal
+      setSelectedOrder(null);
+      
+      // TODO: Re-fetch orders or use optimistic update
+      console.log(`Order ${orderId} marked as ${newStatus}`);
+    } catch (error) {
+      console.error('Failed to update order status:', error);
+      // TODO: Show error toast to seller
+    }
   };
 
   // Status Badge Component (Design.md compliant)
@@ -175,13 +210,19 @@ export default function SellerDashboard() {
                 </button>
                 
                 {order.status === 'pending' && (
-                  <button className="flex-1 py-3 px-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-lg text-sm font-semibold shadow-sm hover:opacity-90 transition text-center">
+                  <button 
+                    onClick={() => handleStatusChange(order.id, 'cooking')}
+                    className="flex-1 py-3 px-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-lg text-sm font-semibold shadow-sm hover:opacity-90 transition text-center"
+                  >
                     Mark Cooking
                   </button>
                 )}
                 
                 {order.status === 'cooking' && (
-                  <button className="flex-1 py-3 px-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-lg text-sm font-semibold shadow-sm hover:opacity-90 transition text-center">
+                  <button 
+                    onClick={() => handleStatusChange(order.id, 'ready')}
+                    className="flex-1 py-3 px-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-lg text-sm font-semibold shadow-sm hover:opacity-90 transition text-center"
+                  >
                     Mark Ready
                   </button>
                 )}
@@ -223,41 +264,103 @@ export default function SellerDashboard() {
 
       {/* ==================== ORDER DETAILS MODAL (Simple Overlay) ==================== */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-on_surface/40 backdrop-blur-sm p-4" onClick={() => setSelectedOrder(null)}>
+        <div 
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-on_surface/60 backdrop-blur-sm p-4"
+          onClick={() => setSelectedOrder(null)}
+        >
           <div 
-            className="bg-surface_container_lowest w-full max-w-sm rounded-2xl p-6 shadow-2xl animate-in slide-in-from-bottom-10"
+            className="bg-surface_container_lowest/95 backdrop-blur-2xl w-full max-w-md rounded-2xl p-6 shadow-ambient animate-in fade-in zoom-in-95 duration-200 relative overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-display font-bold text-on_surface">Order #{selectedOrder.id}</h3>
-              <button onClick={() => setSelectedOrder(null)} className="text-on_surface/50 hover:text-on_surface">
-                <MoreVertical className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="space-y-4 mb-8">
-              <div className="bg-surface_container_low p-4 rounded-lg">
-                <p className="text-xs text-on_surface/50 uppercase tracking-wide mb-1">Customer</p>
-                <p className="font-semibold text-on_surface">{selectedOrder.customer}</p>
-                <p className="text-sm text-primary">{selectedOrder.location}</p>
-              </div>
-              
-              <div className="bg-surface_container_low p-4 rounded-lg">
-                <p className="text-xs text-on_surface/50 uppercase tracking-wide mb-1">Items</p>
-                <p className="font-medium text-on_surface">{selectedOrder.items}</p>
-              </div>
+            {/* Adinkra Watermark (Nyame Nti) */}
+            <div className="absolute top-4 right-4 opacity-[0.05] pointer-events-none">
+              <svg viewBox="0 0 100 100" className="w-32 h-32 fill-primary">
+                <path d="M50 10 C30 10 10 30 10 50 C10 70 30 90 50 90 C70 90 90 70 90 50 C90 30 70 10 50 10 Z M50 25 C60 25 70 35 70 50 C70 65 60 75 50 75 C40 75 30 65 30 50 C30 35 40 25 50 25 Z" />
+              </svg>
             </div>
 
-            <button 
-              onClick={() => setSelectedOrder(null)}
-              className="w-full bg-primary text-white py-3 rounded-lg font-semibold"
-            >
-              Close
-            </button>
+            {/* Header: Order Code */}
+            <div className="mb-6 relative">
+              <p className="text-tertiary text-xs font-bold uppercase tracking-widest mb-1">Order Code</p>
+              <h2 className="text-5xl font-display font-bold text-primary tracking-tight">{selectedOrder.id}</h2>
+              
+              {/* MoMo Confirmed Badge */}
+              {selectedOrder.paymentStatus === 'paid' && (
+                <div className="inline-flex items-center gap-1.5 mt-3 bg-primary-fixed_dim/30 text-primary px-3 py-1.5 rounded-full text-sm font-semibold">
+                  <CheckCircle className="w-4 h-4" />
+                  MoMo Confirmed
+                </div>
+              )}
+            </div>
+
+            {/* Customer Info */}
+            <div className="space-y-4 mb-6 relative">
+              <div>
+                <p className="text-on_surface/60 text-sm mb-1">Customer</p>
+                <p className="font-display font-semibold text-on_surface text-lg">{selectedOrder.customer}</p>
+                <p className="text-on_surface/70 text-sm">{selectedOrder.phone}</p>
+              </div>
+
+              {/* Order Items */}
+              <div className="border-t border-outline_variant/15 pt-4">
+                <p className="text-on_surface/60 text-sm mb-2">Order Items</p>
+                <div className="flex justify-between items-start">
+                  <p className="font-body text-on_surface">{selectedOrder.items}</p>
+                  {selectedOrder.quantity > 1 && (
+                    <span className="text-primary font-bold ml-3">x{selectedOrder.quantity}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Special Notes - READ ONLY */}
+              {selectedOrder.specialNotes && (
+                <div className="border-t border-outline_variant/15 pt-4">
+                  <p className="text-on_surface/60 text-sm mb-2">Special Notes</p>
+                  <div className="bg-surface_container_low rounded-lg p-3 border-l-2 border-primary/30">
+                    <p className="font-body text-on_surface text-sm italic">{selectedOrder.specialNotes}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-3 relative">
+              {selectedOrder.status === 'pending' && (
+                <button 
+                  onClick={() => handleStatusChange(selectedOrder.id, 'cooking')}
+                  className="w-full bg-gradient-to-br from-primary to-primary-container text-white py-4 rounded-lg font-semibold shadow-sm hover:opacity-90 transition flex items-center justify-center gap-2"
+                >
+                  <Utensils className="w-5 h-5" />
+                  Mark as Cooking
+                </button>
+              )}
+              
+              {selectedOrder.status === 'cooking' && (
+                <button 
+                  onClick={() => handleStatusChange(selectedOrder.id, 'ready')}
+                  className="w-full bg-gradient-to-br from-primary to-primary-container text-white py-4 rounded-lg font-semibold shadow-sm hover:opacity-90 transition flex items-center justify-center gap-2"
+                >
+                  <CheckCircle className="w-5 h-5" />
+                  Mark as Ready
+                </button>
+              )}
+              
+              {selectedOrder.status === 'ready' && (
+                <div className="bg-primary-fixed_dim/20 border border-primary-fixed_dim/40 rounded-lg p-4 text-center">
+                  <p className="text-primary font-semibold">Order Ready for Pickup</p>
+                </div>
+              )}
+
+              <button 
+                onClick={() => setSelectedOrder(null)}
+                className="w-full bg-surface_container_low text-on_surface py-3 rounded-lg font-semibold hover:bg-surface_container_lowest transition"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }
