@@ -32,6 +32,28 @@ Kueue addresses the inefficiencies in street food ordering by providing a digita
 - **Fonts:** Plus Jakarta Sans, Manrope
 - **Deployment:** Vercel
 
+## Known Working Versions
+
+- **dependencies**:
+    "@supabase/supabase-js": "~2.100.0",
+    "eslint-config-next": "14.2.5",
+    "lucide-react": "1.6.0",
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+
+- **devDependencies**:
+    "@types/node": "20.19.37",
+    "@types/react": "18.3.28",
+    "@types/react-dom": "18.3.7",
+    "eslint": "8.57.1",
+    "postcss": "8.5.8",
+    "tailwindcss": "3.4.1",
+    "typescript": "5.9.3"
+
+*NB: The condition "--legacy-peer-deps" needs to be present for all dependency conflictions to be rendered ignorable, otherwise a conflict could spiral into the software not working as intended or simply crashing.* 
+Particularly, "npm install --legacy-peer-deps"
+
 ## Design System
 
 The UI follows the "Modern Weaver" design philosophy, emphasizing structural rhythm, tonal layering, and a Ghanaian-inspired color palette. Key principles include:
@@ -43,7 +65,7 @@ The UI follows the "Modern Weaver" design philosophy, emphasizing structural rhy
 
 ## Deployment
 
-This project is hosted on Vercel. Environment variables for Supabase connection are managed securely through the Vercel dashboard.
+This project is hosted on Vercel. Environment variables for Supabase connection are managed securely through the Vercel dashboard. 
 
 ## License
 
