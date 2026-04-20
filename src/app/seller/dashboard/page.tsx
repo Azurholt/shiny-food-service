@@ -21,9 +21,9 @@ const INITIAL_ORDERS = [
     customer: 'Kwame A.',
     phone: '0502928773',
     location: 'Ayeduase Gate',
-    items: 'Fufu & Light Soup (2), Extra Goat Meat',
+    items: 'Fufu & Light Soup',
     quantity: 2,
-    specialNotes: 'Extra goat meat, no fish',
+    specialNotes: 'Extra goat meat (1)',
     status: 'pending',
     paymentStatus: 'paid',
     time: '12:04 PM'
@@ -45,9 +45,9 @@ const INITIAL_ORDERS = [
     customer: 'Kofi B.',
     phone: '0541234567',
     location: 'KNUST Post Office',
-    items: 'Banku & Tilapia (Large), Extra Shito',
+    items: 'Banku & Tilapia (Large)',
     quantity: 1,
-    specialNotes: 'Very spicy shito',
+    specialNotes: 'Extra shito',
     status: 'ready',
     paymentStatus: 'paid',
     time: '11:45 AM'
@@ -116,7 +116,7 @@ export default function SellerDashboard() {
         <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <ChefHat className="w-6 h-6 text-primary" />
+            <ChefHat className="w-6 h-6 text-tertiary-fixed" />
             <span className="text-lg font-display font-bold text-on_surface">Kueue</span>
           </div>
           
@@ -265,11 +265,11 @@ export default function SellerDashboard() {
       {/* ==================== ORDER DETAILS MODAL (Simple Overlay) ==================== */}
       {selectedOrder && (
         <div 
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-on_surface/60 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-on_surface/10 backdrop-blur p-4"
           onClick={() => setSelectedOrder(null)}
         >
           <div 
-            className="bg-surface_container_lowest/95 backdrop-blur-2xl w-full max-w-md rounded-2xl p-6 shadow-ambient animate-in fade-in zoom-in-95 duration-200 relative overflow-hidden"
+            className="bg-surface_container_lowest w-full max-w-md rounded-2xl p-6 shadow-ambient animate-in fade-in zoom-in-95 duration-200 relative overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Adinkra Watermark (Nyame Nti) */}
@@ -305,7 +305,7 @@ export default function SellerDashboard() {
               <div className="border-t border-outline_variant/15 pt-4">
                 <p className="text-on_surface/60 text-sm mb-2">Order Items</p>
                 <div className="flex justify-between items-start">
-                  <p className="font-body text-on_surface">{selectedOrder.items}</p>
+                  <p className="font-body font-semibold text-on_surface">{selectedOrder.items}</p>
                   {selectedOrder.quantity > 1 && (
                     <span className="text-primary font-bold ml-3">x{selectedOrder.quantity}</span>
                   )}
