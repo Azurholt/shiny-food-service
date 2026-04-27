@@ -1,4 +1,4 @@
-# Kueue (KumasiQueue)
+# Kueue
 
 A modern food ordering and queue management platform built for Kumasi's busy markets. Kueue connects customers with local food sellers through an organized, transparent system to eliminate uncertain queues and reduce wasted food.
 
