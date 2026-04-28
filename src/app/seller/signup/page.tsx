@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { ChefHat, ArrowLeft, Store, User, Phone, Lock, MapPin, Tag, Loader2, CheckCircle } from 'lucide-react';
+import { useState } from 'react';
+import { ChefHat, ArrowLeft, Store, User, Phone, Lock, MapPin, Loader2, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
@@ -51,31 +51,35 @@ export default function SellerSignup() {
     }
 
     try {
-      // 1. Generate hidden email & pad PIN for Supabase
-      const cleanPhone = form.phone.replace(/\D/g, '');
-      const hiddenEmail = `kueue_seller_${cleanPhone}@app.local`;
-      const paddedPin = `KUE_${form.pin}`; // Meets 6-char requirement
-
-      // 2. Sign up with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: hiddenEmail,
-        password: paddedPin,
-        options: {
-          data: {
-            full_name: form.ownerName,
-            phone: form.phone
-          }
-        }
+      const signupResponse = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
       });
+      const signupBody = await signupResponse.json();
+      if (!signupResponse.ok) {
+        throw new Error(signupBody.error || 'Signup failed. Please try again.');
+      }
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error('Signup failed. Please try again.');
+      if (!signupBody.userId) {
+        throw new Error('Signup failed. Please try again.');
+      }
 
-      // 3. Create seller profile linked to auth user
+      if (signupBody.accessToken && signupBody.refreshToken) {
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: signupBody.accessToken,
+          refresh_token: signupBody.refreshToken,
+        });
+        if (sessionError) throw sessionError;
+      }
+
+      // Create seller profile linked to auth user
       const { error: profileError } = await supabase
         .from('sellers')
         .insert({
-          user_id: authData.user.id,
+          user_id: signupBody.userId,
           business_name: form.businessName,
           owner_name: form.ownerName,
           phone: form.phone,
@@ -136,7 +140,7 @@ export default function SellerSignup() {
             </div>
           )}
 
-          <form onSubmit={handleSignup} className="space-y-5">
+          <form onSubmit={handleSignup} method="post" className="space-y-5">
             <InputField label="Stall Name" name="businessName" icon={<Store className="w-5 h-5" />} placeholder="e.g. Auntie Ama's Waakye" value={form.businessName} onChange={handleChange} required />
             <InputField label="Owner Name" name="ownerName" icon={<User className="w-5 h-5" />} placeholder="Your full name" value={form.ownerName} onChange={handleChange} required />
             <InputField label="Phone Number" name="phone" icon={<Phone className="w-5 h-5" />} placeholder="054 123 4567" value={form.phone} onChange={handleChange} required />
