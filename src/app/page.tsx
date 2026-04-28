@@ -41,7 +41,7 @@ export default function Home() {
               <a href="#marketplace" className="text-sm font-medium text-on_surface/70 hover:text-primary transition">
                 Marketplace
               </a>
-              <a href="#track-order" className="text-sm font-medium text-on_surface/70 hover:text-primary transition">
+              <a href="/customer/login" className="text-sm font-medium text-on_surface/70 hover:text-primary transition">
                 Track Order
               </a>
               <a href="#sellers" className="text-sm font-medium text-on_surface/70 hover:text-primary transition">
@@ -124,14 +124,14 @@ export default function Home() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 mb-10">
                 <Link 
-                  href="#categories" 
+                  href="/customer/login" 
                   className="inline-flex items-center justify-center gap-2 bg-gradient-to-br from-primary to-primary-container hover:from-primary-container hover:to-primary text-white px-8 py-4 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl group"
                 >
                   I&apos;m a Customer 
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link 
-                  href="/seller/signup" 
+                  href="/seller/login" 
                   className="inline-flex items-center justify-center gap-2 bg-surface_container_lowest hover:bg-surface_container_low text-on_surface border-2 border-outline-variant/20 px-8 py-4 rounded-lg font-semibold transition-all duration-200"
                 >
                   I&apos;m a Seller
@@ -505,7 +505,7 @@ export default function Home() {
           {/* Bottom Bar */}
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-white/40 text-sm font-body">
-              © 2026 Kueue. Made with ❤️ in KNUST, Ghana.
+              Copyright © 2026 Kueue. Made with ❤️ in KNUST, Ghana.
             </p>
             <div className="flex items-center gap-6 text-sm">
               <a href="#privacy" className="text-white/40 hover:text-white/60 transition font-body">Privacy Policy</a>
