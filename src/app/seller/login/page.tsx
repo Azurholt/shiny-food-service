@@ -19,16 +19,36 @@ export default function SellerLogin() {
     setLoading(true);
     setError('');
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const loginResponse = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: email.trim(),
+        password,
+      }),
+    });
+
+    const loginBody = await loginResponse.json();
+    if (!loginResponse.ok) {
+      setError(loginBody.error || 'Unable to sign in right now.');
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.setSession({
+      access_token: loginBody.accessToken,
+      refresh_token: loginBody.refreshToken,
     });
 
     if (error) {
       setError(error.message);
-    } else {
-      router.push('/seller/dashboard');
+      setLoading(false);
+      return;
     }
+
+    router.push('/seller/dashboard');
     setLoading(false);
   };
 
@@ -64,7 +84,7 @@ export default function SellerLogin() {
           )}
 
           {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} method="post" className="space-y-6">
             {/* Email */}
             <div>
               <label className="block text-xs font-semibold text-tertiary mb-2 uppercase tracking-wide">
@@ -76,6 +96,7 @@ export default function SellerLogin() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
                   className="w-full pl-10 pr-4 py-3 bg-transparent border-b border-outline_variant/40 focus:border-primary focus:outline-none transition font-body text-on_surface"
                   placeholder="seller@example.com"
                   required
@@ -94,6 +115,7 @@ export default function SellerLogin() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
                   className="w-full pl-10 pr-4 py-3 bg-transparent border-b border-outline_variant/40 focus:border-primary focus:outline-none transition font-body text-on_surface"
                   placeholder="••••••••"
                   required
