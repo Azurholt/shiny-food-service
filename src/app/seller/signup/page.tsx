@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChefHat, ArrowLeft, Store, User, Phone, Lock, MapPin, Tag, Loader2, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
@@ -19,6 +19,15 @@ export default function SellerSignup() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -78,7 +87,7 @@ export default function SellerSignup() {
       if (profileError) throw profileError;
 
       setSuccess(true);
-      setTimeout(() => router.push('/seller/login'), 2000);
+      redirectTimeoutRef.current = setTimeout(() => router.push('/seller/login'), 2000);
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
     } finally {
@@ -168,7 +177,29 @@ export default function SellerSignup() {
 }
 
 // Reusable Input Component (DESIGN.md Compliant)
-function InputField({ label, name, icon, placeholder, type = "text", maxLength, value, onChange, required }: any) {
+type InputFieldProps = {
+  label: string;
+  name: string;
+  icon: React.ReactNode;
+  placeholder: string;
+  type?: string;
+  maxLength?: number;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  required?: boolean;
+};
+
+function InputField({
+  label,
+  name,
+  icon,
+  placeholder,
+  type = "text",
+  maxLength,
+  value,
+  onChange,
+  required,
+}: InputFieldProps) {
   return (
     <div>
       <label className="block text-xs font-semibold text-tertiary mb-2 uppercase tracking-wide font-display">{label}</label>
@@ -189,7 +220,23 @@ function InputField({ label, name, icon, placeholder, type = "text", maxLength, 
   );
 }
 
-function SelectField({ label, name, value, onChange, children, required }: any) {
+type SelectFieldProps = {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  children: React.ReactNode;
+  required?: boolean;
+};
+
+function SelectField({
+  label,
+  name,
+  value,
+  onChange,
+  children,
+  required,
+}: SelectFieldProps) {
   return (
     <div>
       <label className="block text-xs font-semibold text-tertiary mb-2 uppercase tracking-wide font-display">{label}</label>
