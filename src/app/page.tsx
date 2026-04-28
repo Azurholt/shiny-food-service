@@ -118,7 +118,7 @@ export default function Home() {
               {/* Subheadline */}
               <p className="text-lg text-on_surface/70 mb-10 max-w-xl leading-relaxed font-body">
                 No more waiting in uncertain queues after tiring lectures. No more wasted food from cancelled orders. 
-                Built for KNUST's busy food sellers and hungry students.
+                Built for KNUST&apos;s busy food sellers and hungry students.
               </p>
 
               {/* CTA Buttons */}
@@ -127,14 +127,14 @@ export default function Home() {
                   href="#categories" 
                   className="inline-flex items-center justify-center gap-2 bg-gradient-to-br from-primary to-primary-container hover:from-primary-container hover:to-primary text-white px-8 py-4 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl group"
                 >
-                  I'm a Customer 
+                  I&apos;m a Customer 
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link 
                   href="/seller/signup" 
                   className="inline-flex items-center justify-center gap-2 bg-surface_container_lowest hover:bg-surface_container_low text-on_surface border-2 border-outline-variant/20 px-8 py-4 rounded-lg font-semibold transition-all duration-200"
                 >
-                  I'm a Seller
+                  I&apos;m a Seller
                 </Link>
               </div>
 
@@ -200,7 +200,7 @@ export default function Home() {
                 Explore by Taste
               </h2>
               <p className="text-on_surface/60 font-body">
-                Discover the best food from top-rated Hadjia's and Aunties and Uncles around KNUST.
+                Discover the best food from top-rated Hadjia&apos;s and Aunties and Uncles around KNUST.
               </p>
             </div>
             <Link href="#marketplace" className="hidden sm:inline-flex items-center gap-2 text-primary font-semibold hover:text-primary-container transition">
@@ -455,7 +455,7 @@ export default function Home() {
                 <span className="text-lg font-display font-bold text-white">Kueue</span>
               </div>
               <p className="text-white/60 text-sm leading-relaxed mb-6 font-body">
-                Making food ordering simple for KNUST's busy markets. Order. Track. Enjoy.
+                Making food ordering simple for KNUST&apos;s busy markets. Order. Track. Enjoy.
               </p>
               <div className="flex items-center gap-4">
                 <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-white/20 transition">
