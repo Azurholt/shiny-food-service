@@ -135,7 +135,7 @@ export default function SellerLogin() {
 
           {/* Footer */}
           <p className="text-center mt-6 text-sm font-body text-on_surface/60">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/seller/signup" className="text-primary font-semibold hover:underline">
               Register Stall
             </Link>
