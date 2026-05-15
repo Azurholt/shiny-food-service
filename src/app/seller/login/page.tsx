@@ -48,7 +48,7 @@ export default function SellerLogin() {
       return;
     }
 
-    router.push('/seller/dashboard');
+    router.push('/seller/dashboard/queue');
     setLoading(false);
   };
 
