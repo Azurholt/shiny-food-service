@@ -5,6 +5,7 @@ import { ChefHat, ArrowLeft, Store, User, Phone, Lock, MapPin, Loader2, CheckCir
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
+import { normalizeGhanaPhone } from '@/lib/sellerAuth';
 
 export default function SellerSignup() {
   const [form, setForm] = useState({
@@ -39,13 +40,16 @@ export default function SellerSignup() {
     setLoading(true);
 
     // Validation
-    if (!/^\d{4}$/.test(form.pin)) {
-      setError('PIN must be exactly 4 digits.');
+    try {
+      normalizeGhanaPhone(form.phone);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Enter a valid Ghanaian phone number.');
       setLoading(false);
       return;
     }
-    if (!/^0[1-9]\d{8}$/.test(form.phone.replace(/\s/g, ''))) {
-      setError('Enter a valid Ghanaian phone number (024..., 054..., etc.).');
+
+    if (!/^\d{4}$/.test(form.pin)) {
+      setError('PIN must be exactly 4 digits.');
       setLoading(false);
       return;
     }
@@ -74,21 +78,6 @@ export default function SellerSignup() {
         });
         if (sessionError) throw sessionError;
       }
-
-      // Create seller profile linked to auth user
-      const { error: profileError } = await supabase
-        .from('sellers')
-        .insert({
-          user_id: signupBody.userId,
-          business_name: form.businessName,
-          owner_name: form.ownerName,
-          phone: form.phone,
-          location: form.location,
-          food_category: form.category,
-          status: 'pending'
-        });
-
-      if (profileError) throw profileError;
 
       setSuccess(true);
       redirectTimeoutRef.current = setTimeout(() => router.push('/seller/login'), 2000);
