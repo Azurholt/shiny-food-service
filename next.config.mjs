@@ -43,10 +43,14 @@ const nextConfig = {
   },
   images: {
     // Mitigates multiple Next.js image-optimizer CVE classes by removing optimizer surface.
-    unoptimized: true,
-    remotePatterns: [],
-    dangerouslyAllowSVG: false,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    unoptimized: false, //Enable's the default Next.js image optimization
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+      },
+    ],
+    formats: ['image/avif', 'image/webp'],
   },
 };
 
