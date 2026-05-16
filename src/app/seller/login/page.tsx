@@ -2,14 +2,14 @@
 
 // src/app/seller/login/page.tsx
 import { useState } from 'react';
-import { ChefHat, ArrowLeft, Mail, Lock } from 'lucide-react';
+import { ChefHat, ArrowLeft, Phone, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
 export default function SellerLogin() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -25,8 +25,8 @@ export default function SellerLogin() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        email: email.trim(),
-        password,
+        phone: phone.trim(),
+        pin: pin.trim(),
       }),
     });
 
@@ -85,39 +85,40 @@ export default function SellerLogin() {
 
           {/* Form */}
           <form onSubmit={handleLogin} method="post" className="space-y-6">
-            {/* Email */}
+            {/* Phone */}
             <div>
               <label className="block text-xs font-semibold text-tertiary mb-2 uppercase tracking-wide">
-                Email Address
+                Phone Number
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-on_surface/40" />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-on_surface/40" />
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  autoComplete="tel"
                   className="w-full pl-10 pr-4 py-3 bg-transparent border-b border-outline_variant/40 focus:border-primary focus:outline-none transition font-body text-on_surface"
-                  placeholder="seller@example.com"
+                  placeholder="054 123 4567"
                   required
                 />
               </div>
             </div>
 
-            {/* Password */}
+            {/* PIN */}
             <div>
               <label className="block text-xs font-semibold text-tertiary mb-2 uppercase tracking-wide">
-                Password
+                4-Digit PIN
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-on_surface/40" />
                 <input
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value)}
                   autoComplete="current-password"
                   className="w-full pl-10 pr-4 py-3 bg-transparent border-b border-outline_variant/40 focus:border-primary focus:outline-none transition font-body text-on_surface"
-                  placeholder="••••••••"
+                  placeholder="1234"
+                  maxLength={4}
                   required
                 />
               </div>

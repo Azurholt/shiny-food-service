@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAuthConfig, isBodyTooLarge } from '@/lib/supabaseAuthServer';
+import {
+  normalizeGhanaPhone,
+  sellerCredentialEmail,
+  sellerCredentialPassword,
+} from '@/lib/sellerAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,17 +44,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'All signup fields are required.' }, { status: 400 });
   }
 
-  const cleanPhone = phone.replace(/\D/g, '');
-  if (!/^0[1-9]\d{8}$/.test(cleanPhone)) {
-    return NextResponse.json({ error: 'Enter a valid Ghanaian phone number.' }, { status: 400 });
+  let canonicalLocalPhone: string;
+  let hiddenEmail: string;
+  let paddedPin: string;
+  try {
+    canonicalLocalPhone = normalizeGhanaPhone(phone).local;
+    hiddenEmail = sellerCredentialEmail(canonicalLocalPhone);
+    paddedPin = sellerCredentialPassword(pin);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Invalid phone or PIN.',
+        signup_failed_stage: 'input_validation',
+      },
+      { status: 400 }
+    );
   }
-
-  if (!/^\d{4}$/.test(pin)) {
-    return NextResponse.json({ error: 'PIN must be exactly 4 digits.' }, { status: 400 });
-  }
-
-  const hiddenEmail = `kueue_seller_${cleanPhone}@app.local`;
-  const paddedPin = `KUE_${pin}`;
 
   try {
     const { url, anonKey } = getSupabaseAuthConfig();
@@ -75,25 +85,74 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!supabaseResponse.ok) {
       const message = responseBody?.msg || responseBody?.error_description || 'Signup failed.';
-      return NextResponse.json({ error: message }, { status: 400 });
+      return NextResponse.json(
+        { error: message, signup_failed_stage: 'auth_signup' },
+        { status: 400 }
+      );
+    }
+
+    const userId = responseBody.user?.id as string | undefined;
+    const accessToken = responseBody.access_token as string | undefined;
+    const refreshToken = responseBody.refresh_token as string | undefined;
+
+    if (!userId || !accessToken || !refreshToken) {
+      return NextResponse.json(
+        { error: 'Signup succeeded but no session was returned.', signup_failed_stage: 'auth_session' },
+        { status: 502 }
+      );
+    }
+
+    const insertResponse = await fetch(`${url}/rest/v1/sellers`, {
+      method: 'POST',
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation',
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        business_name: businessName,
+        owner_name: ownerName,
+        phone: canonicalLocalPhone,
+        location,
+        food_category: category,
+        status: 'pending',
+      }),
+      cache: 'no-store',
+    });
+
+    const insertBody = await insertResponse.json().catch(() => null);
+    if (!insertResponse.ok) {
+      const insertMessage =
+        insertBody?.message || insertBody?.hint || insertBody?.details || 'Unable to create seller profile.';
+      console.error('seller_signup_profile_insert_failed', {
+        signup_failed_stage: 'profile_insert',
+        message: insertMessage,
+        user_id: userId,
+      });
+      return NextResponse.json(
+        { error: insertMessage, signup_failed_stage: 'profile_insert' },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json(
       {
-        userId: responseBody.user?.id,
-        accessToken: responseBody.access_token,
-        refreshToken: responseBody.refresh_token,
-        sellerProfile: {
-          businessName,
-          ownerName,
-          phone,
-          location,
-          category,
-        },
+        userId,
+        accessToken,
+        refreshToken,
       },
       { status: 201 }
     );
-  } catch {
-    return NextResponse.json({ error: 'Unable to process signup right now.' }, { status: 500 });
+  } catch (error) {
+    console.error('seller_signup_failed', {
+      signup_failed_stage: 'upstream_error',
+      message: error instanceof Error ? error.message : 'unknown',
+    });
+    return NextResponse.json(
+      { error: 'Unable to process signup right now.', signup_failed_stage: 'upstream_error' },
+      { status: 500 }
+    );
   }
 }
