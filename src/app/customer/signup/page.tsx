@@ -159,12 +159,12 @@ export default function CustomerSignup() {
                       'bg-surface_container_low flex items-center justify-center text-xs font-bold text-on_surface'
                     }`}
                   >
-                    {i === 3 && '5k+'}
+                    {i === 3 && '5^???'}
                   </div>
                 ))}
               </div>
               <div className="text-sm font-medium text-on_surface/60">
-                <p className="font-semibold text-on_surface">5,000+</p>
+                <p className="font-semibold text-on_surface">5 bazillion</p>
                 <p>Students eating daily</p>
               </div>
             </div>

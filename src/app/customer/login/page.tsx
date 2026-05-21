@@ -104,49 +104,28 @@ export default function CustomerLogin() {
   return (
     <div className="min-h-screen bg-surface flex font-body">
       
-      {/* ==================== LEFT SIDE: ARTISTIC COLLAGE ==================== */}
+      {/* ==================== LEFT SIDE: Kente Background ==================== */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         
-        {/* Abstract Color Collage - Ghanaian Palette */}
-        <div className="absolute inset-0 z-0">
-          {/* Base warm surface */}
-          <div className="absolute inset-0 bg-surface"></div>
-          
-          {/* Primary Green Blob (Top Left) */}
-          <div className="absolute -top-32 -left-32 w-[600px] h-[600px] bg-primary/15 rounded-full blur-[120px] mix-blend-multiply animate-pulse"></div>
-          
-          {/* Tertiary Gold Blob (Center) */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-tertiary_fixed_dim/25 rounded-full blur-[100px] mix-blend-multiply rotate-12"></div>
-          
-          {/* Secondary Red Blob (Bottom Right) */}
-          <div className="absolute -bottom-40 -right-40 w-[700px] h-[700px] bg-secondary/10 rounded-full blur-[140px] mix-blend-multiply"></div>
-
-          {/* Subtle Texture Overlay (Weave Pattern) */}
-          <div className="absolute inset-0 opacity-[0.02]" 
-            style={{
-              backgroundImage: `radial-gradient(circle at 2px 2px, #00502e 1px, transparent 0)`,
-              backgroundSize: '32px 32px'
-            }}
-          ></div>
+        {/* Kente Pattern Background */}
+        <div className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: `url('/images/trad kente.png')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        >
+          {/*Overlay to ensure text readability*/}
+          <div className="absolute inset-0 bg-surface/70 backdrop-blur-[2px]" >
+          </div>
         </div>
 
         {/* Content Overlay */}
         <div className="relative z-10 flex flex-col justify-center px-16 xl:px-24 h-full">
           
-          {/* Adinkra Watermark: Nyame Nti (Faith) */}
-          <div className="absolute top-8 left-8 opacity-[0.08] pointer-events-none">
-            <svg viewBox="0 0 100 100" className="w-40 h-40 fill-on_surface">
-               <path d="M50 10 C30 10 10 30 10 50 C10 70 30 90 50 90 C70 90 90 70 90 50 C90 30 70 10 50 10 Z M50 25 C60 25 70 35 70 50 C70 65 60 75 50 75 C40 75 30 65 30 50 C30 35 40 25 50 25 Z" />
-            </svg>
-          </div>
-
           <div className="max-w-xl">
-            {/* Brand Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/70 backdrop-blur-md rounded-full border border-outline_variant/10 text-sm font-semibold text-primary mb-8">
-              <ChefHat className="w-4 h-4" />
-              The Modern Weaver
-            </div>
-
+          
             {/* Hero Headline */}
             <h1 className="text-5xl xl:text-6xl font-display font-bold text-on_surface leading-[1.05] mb-6 tracking-tight">
               Welcome Back,<br/>
@@ -154,8 +133,8 @@ export default function CustomerLogin() {
             </h1>
 
             {/* Subheadline */}
-            <p className="text-xl text-on_surface/70 leading-relaxed mb-10">
-              Your queue is waiting. Sign in to pick up where you left off and enjoy zero-wait dining across Kumasi.
+            <p className="text-xl text-on_surface/80 leading-relaxed mb-10">
+              Come to wait for your queue in the comfort of your own space?. Sign in to pick up where you left off.
             </p>
 
             {/* Social Proof */}
@@ -170,12 +149,12 @@ export default function CustomerLogin() {
                       'bg-surface_container_low flex items-center justify-center text-xs font-bold text-on_surface'
                     }`}
                   >
-                    {i === 3 && '5k+'}
+                    {i === 3 && '5^??'}
                   </div>
                 ))}
               </div>
               <div className="text-sm font-medium text-on_surface/60">
-                <p className="font-semibold text-on_surface">5,000+</p>
+                <p className="font-semibold text-on_surface">5 bajillion</p>
                 <p>Students eating daily</p>
               </div>
             </div>
