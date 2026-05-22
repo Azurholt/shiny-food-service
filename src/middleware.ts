@@ -10,6 +10,7 @@ const WINDOW_MS = 60_000;
 const MAX_ATTEMPTS_PER_WINDOW = 8;
 const CLEANUP_INTERVAL_MS = 5 * 60_000;
 const AUTH_ENDPOINTS = new Set(['/api/auth/login', '/api/auth/signup']);
+const isDev = process.env.NODE_ENV !== 'production';
 const SECURITY_HEADERS: Record<string, string> = {
   'Content-Security-Policy': [
     "default-src 'self'",
@@ -19,7 +20,9 @@ const SECURITY_HEADERS: Record<string, string> = {
     "frame-ancestors 'none'",
     "img-src 'self' data: blob:",
     "object-src 'none'",
-    "script-src 'self'",
+    isDev
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+      : "script-src 'self'",
     "style-src 'self' 'unsafe-inline'",
     "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
     'upgrade-insecure-requests',

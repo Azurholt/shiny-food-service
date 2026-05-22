@@ -80,7 +80,7 @@ export default function SellerSignup() {
       }
 
       setSuccess(true);
-      redirectTimeoutRef.current = setTimeout(() => router.push('/seller/login'), 2000);
+      redirectTimeoutRef.current = setTimeout(() => router.push('/seller/dashboard'), 2000);
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
     } finally {
@@ -94,7 +94,7 @@ export default function SellerSignup() {
         <div className="text-center">
           <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
           <h2 className="text-2xl font-display font-bold text-on_surface mb-2">Stall Registered!</h2>
-          <p className="font-body text-on_surface/60">Redirecting to login...</p>
+          <p className="font-body text-on_surface/60">Redirecting to your dashboard...</p>
         </div>
       </div>
     );
@@ -103,12 +103,6 @@ export default function SellerSignup() {
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg relative">
-        {/* Adinkra Watermark (Nyame Nti - Faith) */}
-        <div className="absolute -top-12 -right-12 w-48 h-48 opacity-[0.04] pointer-events-none">
-          <svg viewBox="0 0 100 100" className="w-full h-full fill-on_surface">
-            <path d="M50 10 C30 10 10 30 10 50 C10 70 30 90 50 90 C70 90 90 70 90 50 C90 30 70 10 50 10 Z M50 25 C60 25 70 35 70 50 C70 65 60 75 50 75 C40 75 30 65 30 50 C30 35 40 25 50 25 Z" />
-          </svg>
-        </div>
 
         <Link href="/" className="inline-flex items-center gap-2 text-on_surface/60 hover:text-primary mb-8 transition font-body text-sm">
           <ArrowLeft className="w-5 h-5" /> Back to Home
@@ -129,7 +123,7 @@ export default function SellerSignup() {
             </div>
           )}
 
-          <form onSubmit={handleSignup} method="post" className="space-y-5">
+          <form onSubmit={handleSignup} className="space-y-5"> 
             <InputField label="Stall Name" name="businessName" icon={<Store className="w-5 h-5" />} placeholder="e.g. Auntie Ama's Waakye" value={form.businessName} onChange={handleChange} required />
             <InputField label="Owner Name" name="ownerName" icon={<User className="w-5 h-5" />} placeholder="Your full name" value={form.ownerName} onChange={handleChange} required />
             <InputField label="Phone Number" name="phone" icon={<Phone className="w-5 h-5" />} placeholder="054 123 4567" value={form.phone} onChange={handleChange} required />

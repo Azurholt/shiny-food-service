@@ -1,3 +1,5 @@
+const isDev = process.env.NODE_ENV !== 'production';
+
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -6,7 +8,9 @@ const CONTENT_SECURITY_POLICY = [
   "frame-ancestors 'none'",
   "img-src 'self' data: blob:",
   "object-src 'none'",
-  "script-src 'self'",
+  isDev
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+    : "script-src 'self'",
   "style-src 'self' 'unsafe-inline'",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
   'upgrade-insecure-requests',
