@@ -44,9 +44,7 @@ export default function Home() {
               <a href="/customer/login" className="text-sm font-medium text-on_surface/70 hover:text-primary transition">
                 Track Order
               </a>
-              <a href="#sellers" className="text-sm font-medium text-on_surface/70 hover:text-primary transition">
-                Sellers
-              </a>
+              {/* I'll add links here later that don't currently exist. Maybe "Sellers" to jump down to the seller section, and "Support" for a help center or contact info. I want to make sure the header has clear navigation for both buyers and sellers, even if some of the pages aren't built out yet. For now, I'll just add placeholder links that I can fill in as I develop those sections. This way I can design the header with the full navigation in mind, rather than trying to retrofit it later. */}
               <a href="#support" className="text-sm font-medium text-on_surface/70 hover:text-primary transition">
                 Support
               </a>
@@ -55,7 +53,7 @@ export default function Home() {
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center gap-4">
               <Link href="/seller/login" className="text-sm font-medium text-on_surface/70 hover:text-primary transition">
-                Log In
+                Sign In
               </Link>
               <Link 
                 href="/seller/signup" 
@@ -127,14 +125,14 @@ export default function Home() {
                   href="/customer/login" 
                   className="inline-flex items-center justify-center gap-2 bg-gradient-to-br from-primary to-primary-container hover:from-primary-container hover:to-primary text-white px-8 py-4 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl group"
                 >
-                  I&apos;m a Customer 
+                  Buyers 
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link 
                   href="/seller/login" 
                   className="inline-flex items-center justify-center gap-2 bg-surface_container_lowest hover:bg-surface_container_low text-on_surface border-2 border-outline-variant/20 px-8 py-4 rounded-lg font-semibold transition-all duration-200"
                 >
-                  I&apos;m a Seller
+                  Sellers
                 </Link>
               </div>
 
@@ -315,7 +313,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-start">
             
-            {/* Left: Content */}
+            {/* Left: Content */} {/* The black is odd to me. It feels a bit heavy compared to the rest of the site. I want to keep the focus on the content, but maybe I can soften it a bit with a dark gray background instead of pure black. Or I could add some texture or pattern to break up the solid color. I'll experiment with different background options to find something that feels cohesive with the overall design while still making the seller section stand out. The goal is to create a clear visual separation without it feeling too harsh or disconnected from the rest of the site. */}
             <div>
               <h2 className="text-3xl lg:text-4xl font-display font-bold text-white mb-4">
                 For Food Sellers

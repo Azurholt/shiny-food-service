@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { MapPin, User, Utensils, X } from 'lucide-react';
+import { ClipboardList, MapPin, User, Utensils, X } from 'lucide-react';
 import type { Order, OrderStatus } from '@/types/order';
 import {
   fetchTodayActiveOrders,
@@ -17,6 +17,12 @@ const statusStyles: Record<OrderStatus, string> = {
   cooking: 'bg-primary_fixed_dim/30 text-primary',
   ready: 'bg-secondary/20 text-secondary',
   completed: 'bg-on_surface/10 text-on_surface/60',
+};
+
+const paymentStatusStyles: Record<Order['paymentStatus'], string> = {
+  paid: 'bg-primary_fixed_dim/30 text-primary',
+  pending: 'bg-tertiary_fixed_dim/30 text-tertiary',
+  credit: 'bg-secondary/20 text-secondary',
 };
 
 export default function QueuePage() {
@@ -87,7 +93,7 @@ export default function QueuePage() {
   const emptyMessage = useMemo(() => {
     if (loading) return 'Loading queue...';
     if (error) return error;
-    return 'No active orders in today’s queue.';
+    return 'No orders';
   }, [loading, error]);
 
   return (
@@ -98,8 +104,9 @@ export default function QueuePage() {
       </div>
 
       {orders.length === 0 ? (
-        <div className="bg-surface_container_lowest rounded-xl p-6 shadow-ambient">
-          <p className="text-on_surface/70 font-semibold">{emptyMessage}</p>
+        <div className="bg-surface_container_lowest rounded-2xl p-10 shadow-ambient text-center">
+          <ClipboardList className="w-8 h-8 text-on_surface/40 mx-auto mb-3" />
+          <p className="text-on_surface/50 font-body font-semibold">{emptyMessage}</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -107,14 +114,21 @@ export default function QueuePage() {
             const meta = getNextStatusMeta(order.status);
             return (
               <article key={order.id} className="bg-surface_container_lowest rounded-xl p-5 shadow-ambient">
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-4 gap-2">
                   <div>
                     <p className="text-xs text-on_surface/50 font-medium mb-0.5">Order</p>
                     <h2 className="text-2xl font-display font-bold text-primary tracking-tight">{order.id}</h2>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${statusStyles[order.status]}`}>
-                    {order.status}
-                  </span>
+                  <div className="flex flex-col items-end gap-2">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${statusStyles[order.status]}`}>
+                      {order.status}
+                    </span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide ${paymentStatusStyles[order.paymentStatus]}`}
+                    >
+                      {order.paymentStatus}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="space-y-2 mb-5">
@@ -135,7 +149,7 @@ export default function QueuePage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setSelectedOrder(order)}
-                    className="flex-1 py-3 px-4 border border-outline_variant/30 rounded-lg text-sm font-semibold text-on_surface hover:bg-surface_container_low transition"
+                    className="flex-1 py-3 px-4 rounded-lg text-sm font-semibold text-on_surface bg-surface_container_low hover:bg-surface transition"
                   >
                     View Details
                   </button>

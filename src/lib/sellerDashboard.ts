@@ -10,15 +10,11 @@ type OrderRow = {
   items: OrderItem[] | string[] | null;
   total_price: number | null;
   status: OrderStatus | null;
+  payment_status: 'paid' | 'pending' | 'credit' | null;
+  is_special_customer: boolean | null;
   created_at: string | null;
   stitch_image: string | null;
   seller_user_id: string | null;
-};
-
-export type HistoryAggregate = {
-  day: string;
-  orderCount: number;
-  totalRevenue: number;
 };
 
 export type SellerProfile = {
@@ -29,6 +25,13 @@ export type SellerProfile = {
   foodCategory: string;
 };
 
+export type SpecialCustomer = {
+  id: string;
+  phone: string;
+  customerName: string;
+  createdAt?: string;
+};
+
 const ORDER_STATUS_FLOW: Record<OrderStatus, { next: OrderStatus | null; label: string }> = {
   pending: { next: 'cooking', label: 'Mark Cooking' },
   cooking: { next: 'ready', label: 'Mark Ready' },
@@ -37,8 +40,7 @@ const ORDER_STATUS_FLOW: Record<OrderStatus, { next: OrderStatus | null; label: 
 };
 
 const normalizeItems = (items: OrderRow['items']): OrderItem[] => {
-  if (!Array.isArray(items)) return [];
-  if (items.length === 0) return [];
+  if (!Array.isArray(items) || items.length === 0) return [];
   if (typeof items[0] === 'string') {
     return (items as string[]).map((name) => ({ name, quantity: 1 }));
   }
@@ -47,20 +49,22 @@ const normalizeItems = (items: OrderRow['items']): OrderItem[] => {
 
 const mapRowToOrder = (row: OrderRow): Order => ({
   id: String(row.id),
-  customerName: row.customer_name ?? 'Unknown Customer',
+  customerName: row.customer_name?.trim() || 'Unknown Customer',
   items: normalizeItems(row.items),
-  totalPrice: row.total_price ?? 0,
+  totalPrice: Number(row.total_price ?? 0),
   status: row.status ?? 'pending',
+  paymentStatus: row.payment_status ?? 'paid',
+  isSpecialCustomer: Boolean(row.is_special_customer),
   timestamp: row.created_at ?? new Date().toISOString(),
   stitchImage: row.stitch_image,
 });
 
-const getDayBoundsIso = () => {
+const getLocalDayBoundsIso = () => {
   const now = new Date();
   const start = new Date(now);
-  start.setUTCHours(0, 0, 0, 0);
+  start.setHours(0, 0, 0, 0);
   const end = new Date(now);
-  end.setUTCHours(23, 59, 59, 999);
+  end.setHours(23, 59, 59, 999);
   return {
     startIso: start.toISOString(),
     endIso: end.toISOString(),
@@ -78,10 +82,12 @@ export const getSellerUserId = async (): Promise<string> => {
 };
 
 export const fetchTodayActiveOrders = async (sellerUserId: string): Promise<Order[]> => {
-  const { startIso, endIso } = getDayBoundsIso();
+  const { startIso, endIso } = getLocalDayBoundsIso();
   const { data, error } = await supabase
     .from('orders')
-    .select('id, customer_name, items, total_price, status, created_at, stitch_image, seller_user_id')
+    .select(
+      'id, customer_name, items, total_price, status, payment_status, is_special_customer, created_at, stitch_image, seller_user_id',
+    )
     .eq('seller_user_id', sellerUserId)
     .gte('created_at', startIso)
     .lte('created_at', endIso)
@@ -92,43 +98,22 @@ export const fetchTodayActiveOrders = async (sellerUserId: string): Promise<Orde
   return ((data ?? []) as OrderRow[]).map(mapRowToOrder);
 };
 
-export const fetchHistorySplit = async (
-  sellerUserId: string,
-): Promise<{ recent: Order[]; aggregated: HistoryAggregate[] }> => {
+export const fetchRecentHistory = async (sellerUserId: string): Promise<Order[]> => {
   const now = new Date();
   const cutoff = new Date(now);
-  cutoff.setUTCDate(cutoff.getUTCDate() - 14);
+  cutoff.setDate(cutoff.getDate() - 14);
 
   const { data, error } = await supabase
     .from('orders')
-    .select('id, customer_name, items, total_price, status, created_at, stitch_image, seller_user_id')
+    .select(
+      'id, customer_name, items, total_price, status, payment_status, is_special_customer, created_at, stitch_image, seller_user_id',
+    )
     .eq('seller_user_id', sellerUserId)
+    .gte('created_at', cutoff.toISOString())
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-
-  const recent: Order[] = [];
-  const aggregatedMap = new Map<string, HistoryAggregate>();
-
-  for (const row of (data ?? []) as OrderRow[]) {
-    const date = new Date(row.created_at ?? 0);
-    if (Number.isNaN(date.getTime())) continue;
-    const order = mapRowToOrder(row);
-    if (date >= cutoff) {
-      recent.push(order);
-      continue;
-    }
-    const day = date.toISOString().slice(0, 10);
-    const existing = aggregatedMap.get(day) ?? { day, orderCount: 0, totalRevenue: 0 };
-    existing.orderCount += 1;
-    existing.totalRevenue += order.totalPrice;
-    aggregatedMap.set(day, existing);
-  }
-
-  return {
-    recent,
-    aggregated: Array.from(aggregatedMap.values()).sort((a, b) => (a.day < b.day ? 1 : -1)),
-  };
+  return ((data ?? []) as OrderRow[]).map(mapRowToOrder);
 };
 
 export const updateOrderStatus = async (orderId: string, status: OrderStatus): Promise<void> => {
@@ -182,32 +167,57 @@ export const saveSellerProfile = async (sellerUserId: string, profile: SellerPro
   if (error) throw error;
 };
 
-export const fetchTrustedCustomers = async (sellerUserId: string): Promise<string[]> => {
+export const fetchSpecialCustomers = async (sellerUserId: string): Promise<SpecialCustomer[]> => {
   const { data, error } = await supabase
-    .from('seller_trusted_customers')
-    .select('customer_name')
-    .eq('seller_user_id', sellerUserId)
+    .from('special_customers')
+    .select('id, phone, customer_name, created_at')
+    .eq('seller_id', sellerUserId)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return (data ?? []).map((row) => row.customer_name).filter(Boolean);
+  return (data ?? []).map((row) => ({
+    id: String(row.id),
+    phone: row.phone ?? '',
+    customerName: row.customer_name ?? '',
+    createdAt: row.created_at ?? undefined,
+  }));
 };
 
-export const addTrustedCustomer = async (sellerUserId: string, customerName: string): Promise<void> => {
+export const addSpecialCustomer = async (
+  sellerUserId: string,
+  phone: string,
+  customerName: string,
+): Promise<SpecialCustomer> => {
+  const cleanPhone = phone.trim();
   const cleanName = customerName.trim();
-  if (!cleanName) return;
-  const { error } = await supabase.from('seller_trusted_customers').insert({
-    seller_user_id: sellerUserId,
-    customer_name: cleanName,
-  });
+  if (!cleanPhone || !cleanName) {
+    throw new Error('Phone and customer name are required.');
+  }
+
+  const { data, error } = await supabase
+    .from('special_customers')
+    .insert({
+      seller_id: sellerUserId,
+      phone: cleanPhone,
+      customer_name: cleanName,
+    })
+    .select('id, phone, customer_name, created_at')
+    .single();
+
   if (error) throw error;
+  return {
+    id: String(data.id),
+    phone: data.phone ?? cleanPhone,
+    customerName: data.customer_name ?? cleanName,
+    createdAt: data.created_at ?? undefined,
+  };
 };
 
-export const removeTrustedCustomer = async (sellerUserId: string, customerName: string): Promise<void> => {
+export const removeSpecialCustomer = async (sellerUserId: string, customerId: string): Promise<void> => {
   const { error } = await supabase
-    .from('seller_trusted_customers')
+    .from('special_customers')
     .delete()
-    .eq('seller_user_id', sellerUserId)
-    .eq('customer_name', customerName);
+    .eq('seller_id', sellerUserId)
+    .eq('id', customerId);
   if (error) throw error;
 };

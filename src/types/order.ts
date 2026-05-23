@@ -12,6 +12,8 @@ export type Order = {
   items: OrderItem[];
   totalPrice: number;
   status: OrderStatus;
+  paymentStatus: 'paid' | 'pending' | 'credit';
+  isSpecialCustomer: boolean;
   timestamp: string;
   stitchImage: string | null;
 };
