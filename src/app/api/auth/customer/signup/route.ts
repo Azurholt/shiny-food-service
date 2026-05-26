@@ -55,25 +55,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  try {
-    const rateLimitState = await enforceHourlyPhoneRateLimit('customer_signup', canonicalLocalPhone, 3);
-    if (!rateLimitState.allowed) {
-      return NextResponse.json(
-        { error: 'Too many signup attempts. Try again in about an hour.' },
-        { status: 429 }
-      );
-    }
-  } catch (error) {
+  const rateLimitState = await enforceHourlyPhoneRateLimit('customer_signup', canonicalLocalPhone, 3);
+  if (!rateLimitState.allowed) {
+    return NextResponse.json(
+      { error: 'Too many signup attempts. Try again in about an hour.' },
+      { status: 429 }
+    );
+  }
+
+  if (rateLimitState.reason === 'backend_unavailable') {
     console.error('customer_signup_rate_limit_failed', {
       signup_failed_stage: 'rate_limit',
-      message: error instanceof Error ? error.message : 'unknown',
+      message: 'Rate limiter backend unavailable. Proceeding with fail-open policy.',
       phone: canonicalLocalPhone,
     });
-
-    return NextResponse.json(
-      { error: 'Unable to process signup right now.', signup_failed_stage: 'rate_limit' },
-      { status: 500 }
-    );
   }
 
   if (AUTH_CONFIG.method === 'otp') {
