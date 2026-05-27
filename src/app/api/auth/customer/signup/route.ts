@@ -14,7 +14,6 @@ export const dynamic = 'force-dynamic';
 type SignupPayload = {
   phone?: string;
   pin?: string;
-  displayName?: string;
 };
 
 function normalizeString(value: string | undefined): string {
@@ -35,7 +34,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const phone = normalizeString(payload.phone);
   const pin = normalizeString(payload.pin);
-  const displayName = normalizeString(payload.displayName);
 
   if (!phone || !pin) {
     return NextResponse.json({ error: 'Phone number and PIN are required.' }, { status: 400 });
@@ -54,7 +52,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 400 }
     );
   }
-
   const rateLimitState = await enforceHourlyPhoneRateLimit('customer_signup', canonicalLocalPhone, 3);
   if (!rateLimitState.allowed) {
     return NextResponse.json(
@@ -111,7 +108,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         email: hiddenEmail,
         password: paddedPin,
         data: {
-          full_name: displayName || null,
           phone: canonicalLocalPhone,
         },
       }),
@@ -150,7 +146,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       body: JSON.stringify({
         id: userId,
         phone: canonicalLocalPhone,
-        display_name: displayName || null,
       }),
       cache: 'no-store',
     });
