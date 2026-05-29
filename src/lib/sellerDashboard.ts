@@ -23,6 +23,8 @@ export type SellerProfile = {
   phone: string;
   location: string;
   foodCategory: string;
+  directionNote: string;
+  status: string;
 };
 
 export type SpecialCustomer = {
@@ -30,6 +32,26 @@ export type SpecialCustomer = {
   phone: string;
   customerName: string;
   createdAt?: string;
+};
+
+export type SellerMenuItem = {
+  id: string;
+  sellerId: string;
+  itemName: string;
+  unitPrice: number;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt?: string;
+};
+
+type SellerMenuItemRow = {
+  id: string;
+  seller_id: string | null;
+  item_name: string | null;
+  unit_price: number | string | null;
+  is_active: boolean | null;
+  sort_order: number | null;
+  created_at: string | null;
 };
 
 const ORDER_STATUS_FLOW: Record<OrderStatus, { next: OrderStatus | null; label: string }> = {
@@ -138,7 +160,7 @@ export const subscribeToSellerOrders = (
 export const fetchSellerProfile = async (sellerUserId: string): Promise<SellerProfile> => {
   const { data, error } = await supabase
     .from('sellers')
-    .select('business_name, owner_name, phone, location, food_category')
+    .select('business_name, owner_name, phone, location, food_category, direction_note, status')
     .eq('user_id', sellerUserId)
     .single();
 
@@ -150,6 +172,8 @@ export const fetchSellerProfile = async (sellerUserId: string): Promise<SellerPr
     phone: data.phone ?? '',
     location: data.location ?? '',
     foodCategory: data.food_category ?? '',
+    directionNote: data.direction_note ?? '',
+    status: data.status ?? '',
   };
 };
 
@@ -164,6 +188,97 @@ export const saveSellerProfile = async (sellerUserId: string, profile: SellerPro
       food_category: profile.foodCategory,
     })
     .eq('user_id', sellerUserId);
+  if (error) throw error;
+};
+
+const mapMenuItemRow = (row: SellerMenuItemRow): SellerMenuItem => ({
+  id: row.id,
+  sellerId: row.seller_id ?? '',
+  itemName: row.item_name ?? '',
+  unitPrice: Number(row.unit_price ?? 0),
+  isActive: Boolean(row.is_active),
+  sortOrder: row.sort_order ?? 0,
+  createdAt: row.created_at ?? undefined,
+});
+
+export const fetchSellerMenuItems = async (sellerUserId: string): Promise<SellerMenuItem[]> => {
+  const { data, error } = await supabase
+    .from('seller_menu_items')
+    .select('id, seller_id, item_name, unit_price, is_active, sort_order, created_at')
+    .eq('seller_id', sellerUserId)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: true });
+
+  if (error) throw error;
+  return ((data ?? []) as SellerMenuItemRow[]).map(mapMenuItemRow);
+};
+
+export const createSellerMenuItem = async (
+  sellerUserId: string,
+  itemName: string,
+  unitPrice: number,
+  sortOrder: number,
+): Promise<SellerMenuItem> => {
+  const { data, error } = await supabase
+    .from('seller_menu_items')
+    .insert({
+      seller_id: sellerUserId,
+      item_name: itemName.trim(),
+      unit_price: unitPrice,
+      sort_order: sortOrder,
+      is_active: true,
+    })
+    .select('id, seller_id, item_name, unit_price, is_active, sort_order, created_at')
+    .single();
+
+  if (error) throw error;
+  return mapMenuItemRow(data as SellerMenuItemRow);
+};
+
+export const updateSellerMenuItem = async (
+  sellerUserId: string,
+  menuItemId: string,
+  itemName: string,
+  unitPrice: number,
+): Promise<SellerMenuItem> => {
+  const { data, error } = await supabase
+    .from('seller_menu_items')
+    .update({
+      item_name: itemName.trim(),
+      unit_price: unitPrice,
+    })
+    .eq('seller_id', sellerUserId)
+    .eq('id', menuItemId)
+    .select('id, seller_id, item_name, unit_price, is_active, sort_order, created_at')
+    .single();
+
+  if (error) throw error;
+  return mapMenuItemRow(data as SellerMenuItemRow);
+};
+
+export const setSellerMenuItemActive = async (
+  sellerUserId: string,
+  menuItemId: string,
+  isActive: boolean,
+): Promise<SellerMenuItem> => {
+  const { data, error } = await supabase
+    .from('seller_menu_items')
+    .update({ is_active: isActive })
+    .eq('seller_id', sellerUserId)
+    .eq('id', menuItemId)
+    .select('id, seller_id, item_name, unit_price, is_active, sort_order, created_at')
+    .single();
+
+  if (error) throw error;
+  return mapMenuItemRow(data as SellerMenuItemRow);
+};
+
+export const deleteSellerMenuItem = async (sellerUserId: string, menuItemId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('seller_menu_items')
+    .delete()
+    .eq('seller_id', sellerUserId)
+    .eq('id', menuItemId);
   if (error) throw error;
 };
 
