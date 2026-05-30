@@ -6,7 +6,11 @@ import {
   customerCredentialPassword,
   normalizeGhanaPhone,
 } from '@/lib/customerAuth';
-import { getSupabaseAuthConfig, isBodyTooLarge } from '@/lib/supabaseAuthServer';
+import {
+  getSupabaseAuthConfig,
+  getSupabaseNetworkErrorMessage,
+  isBodyTooLarge,
+} from '@/lib/supabaseAuthServer';
 
 export const dynamic = 'force-dynamic';
 
@@ -116,13 +120,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 200 }
     );
   } catch (error) {
+    const networkMessage = getSupabaseNetworkErrorMessage(error);
     console.error('customer_login_failed', {
       login_failed_reason: 'upstream_error',
       message: error instanceof Error ? error.message : 'unknown',
+      cause: error instanceof Error ? (error.cause as { code?: string } | undefined)?.code : undefined,
     });
 
     return NextResponse.json(
-      { error: 'Unable to process login right now.', login_failed_reason: 'upstream_error' },
+      { error: networkMessage ?? 'Unable to process login right now.', login_failed_reason: 'upstream_error' },
       { status: 500 }
     );
   }

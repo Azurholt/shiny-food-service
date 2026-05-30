@@ -26,3 +26,16 @@ export function isBodyTooLarge(contentLengthHeader: string | null): boolean {
 
   return parsed > MAX_AUTH_BODY_BYTES;
 }
+
+export function getSupabaseNetworkErrorMessage(error: unknown): string | null {
+  if (!(error instanceof TypeError) || error.message !== 'fetch failed') {
+    return null;
+  }
+
+  const cause = error.cause as { code?: string } | undefined;
+  if (cause?.code === 'EACCES') {
+    return 'Supabase is unreachable from this dev server. Restart the dev server with network access enabled.';
+  }
+
+  return 'Supabase is unreachable from this dev server. Check your network connection and Supabase environment variables.';
+}

@@ -7,7 +7,11 @@ import {
   normalizeGhanaPhone,
   validateSignupPin,
 } from '@/lib/customerAuth';
-import { getSupabaseAuthConfig, isBodyTooLarge } from '@/lib/supabaseAuthServer';
+import {
+  getSupabaseAuthConfig,
+  getSupabaseNetworkErrorMessage,
+  isBodyTooLarge,
+} from '@/lib/supabaseAuthServer';
 
 export const dynamic = 'force-dynamic';
 
@@ -173,13 +177,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ userId, accessToken, refreshToken }, { status: 201 });
   } catch (error) {
+    const networkMessage = getSupabaseNetworkErrorMessage(error);
     console.error('customer_signup_failed', {
       signup_failed_stage: 'upstream_error',
       message: error instanceof Error ? error.message : 'unknown',
+      cause: error instanceof Error ? (error.cause as { code?: string } | undefined)?.code : undefined,
     });
 
     return NextResponse.json(
-      { error: 'Unable to process signup right now.', signup_failed_stage: 'upstream_error' },
+      { error: networkMessage ?? 'Unable to process signup right now.', signup_failed_stage: 'upstream_error' },
       { status: 500 }
     );
   }
