@@ -56,12 +56,12 @@ type MenuItemRow = {
 };
 
 export const FOOD_CATEGORIES: FoodCategory[] = [
-  { value: 'waakye', label: 'Waakye', description: 'Rice, beans, shito, gari, and campus comfort.' },
-  { value: 'shawarma', label: 'Shawarma', description: 'Fast wraps for lecture breaks and late cravings.' },
-  { value: 'fufu', label: 'Fufu & Soup', description: 'Hearty bowls from nearby stalls.' },
-  { value: 'rice', label: 'Rice & Stew', description: 'Reliable plates from familiar landmarks.' },
-  { value: 'snacks', label: 'Snacks', description: 'Quick bites, pastries, and small chops.' },
-  { value: 'other', label: 'Other', description: 'Everything delicious that refuses a neat box.' },
+  { value: 'bread and eggs', label: 'Bread and Eggs', description: 'The ultimate Ghanaian comfort breakfast.' },
+  //{ value: 'shawarma', label: 'Shawarma', description: 'Fast wraps for lecture breaks and late cravings.' },
+  //{ value: 'fufu', label: 'Fufu & Soup', description: 'Hearty bowls from nearby stalls.' },
+  //{ value: 'rice', label: 'Rice & Stew', description: 'Reliable plates from familiar landmarks.' },
+  //{ value: 'snacks', label: 'Snacks', description: 'Quick bites, pastries, and small chops.' },
+  //{ value: 'other', label: 'Other', description: 'Everything delicious that refuses a neat box.' },
 ];
 
 const mapSellerRow = (row: SellerRow, busynessLevel: BusynessLevel): DiscoverySeller => ({
