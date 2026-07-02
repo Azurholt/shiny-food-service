@@ -73,7 +73,7 @@ export default function CustomerLoginPage() {
         return;
       }
 
-      router.push('/customer/dashboard/marketplace');
+      router.push('/customer/dashboard');
       setLoading(false);
     } catch {
       setError('Unable to process login right now.');

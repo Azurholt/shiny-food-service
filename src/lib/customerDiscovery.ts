@@ -122,6 +122,7 @@ export const fetchMarketplaceSellers = async (
   const { data, error } = await supabase
     .from('sellers')
     .select('user_id, business_name, location, food_category, direction_note, rating_avg, rating_count')
+
     .eq('food_category', category)
     .eq('location', location)
     .or('status.is.null,status.in.(pending,active)')

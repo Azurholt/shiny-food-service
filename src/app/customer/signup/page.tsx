@@ -39,7 +39,7 @@ export default function CustomerSignupPage() {
     }
 
     const timer = setTimeout(() => {
-      router.push('/customer/dashboard/marketplace');
+      router.push('/customer/dashboard');
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -138,7 +138,7 @@ export default function CustomerSignupPage() {
                   <CheckCircle2 className="h-5 w-5" />
                   <span className="font-display text-lg font-semibold">Account Created</span>
                 </div>
-                <p className="text-sm text-on_surface/70">Redirecting you to marketplace...</p>
+                <p className="text-sm text-on_surface/70">Redirecting you to your dashboard...</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="mt-8 space-y-5">
