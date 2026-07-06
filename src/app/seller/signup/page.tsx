@@ -133,6 +133,7 @@ export default function SellerSignup() {
               <InputField label="Location" name="location" icon={<MapPin className="w-5 h-5" />} placeholder="e.g. Engineering Gate" value={form.location} onChange={handleChange} required />
               <SelectField label="Food Category" name="category" value={form.category} onChange={handleChange} required>
                 <option value="">Select...</option>
+                <option value="bread and egg">Bread and Egg</option>
                 <option value="waakye">Waakye</option>
                 <option value="shawarma">Shawarma</option>
                 <option value="fufu">Fufu & Soup</option>
